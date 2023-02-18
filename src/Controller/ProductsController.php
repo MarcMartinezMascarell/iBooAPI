@@ -14,22 +14,19 @@ use Symfony\Component\Routing\Annotation\Route;
 class ProductsController extends AbstractController
 {
     private $entityManager;
+    private $productRepository;
 
     public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
-    }
-
-    public function getDoctrine()
-    {
-        return $this->entityManager;
+        $this->productRepository = $entityManager->getRepository(Product::class);
     }
 
     //Return view with all products
     #[Route('/', name: 'products_list', methods: ['GET', 'HEAD'])]
     public function list(): Response
     {
-        $products = $this->getDoctrine()->getRepository(Product::class)->findAll();
+        $products = $this->productRepository->findAll();
 
         return $this->render('products/products.html.twig', [
             'products' => $products,
@@ -40,7 +37,7 @@ class ProductsController extends AbstractController
     #[Route('api/products', name: 'products', methods: ['GET', 'HEAD'])]
     public function index(): JsonResponse
     {
-        $products = $this->getDoctrine()->getRepository(Product::class)->findAll();
+        $products = $this->productRepository->findAll();
 
         $data = [];
 
@@ -51,6 +48,7 @@ class ProductsController extends AbstractController
                 'description' => $product->getDescription(),
                 'weight' => $product->getWeight(),
                 'enabled' => $product->isEnabled(),
+                'image_url' => $product->getImgUrl(),
             ];
         }
 
@@ -61,19 +59,16 @@ class ProductsController extends AbstractController
     #[Route('api/products/{id}', name: 'products_show', methods: ['GET', 'HEAD'])]
     public function show(int $id): JsonResponse
     {
-        $product = $this->getDoctrine()->getRepository(Product::class)->find($id);
 
+        $product = $this->productRepository->find($id);
+
+        //If there is no product with the given id, return a 404 error
         if (!$product) {
             return new JsonResponse(['status' => 'Product not found'], Response::HTTP_NOT_FOUND);
         }
 
-        $data = [
-            'id' => $product->getId(),
-            'name' => $product->getName(),
-            'description' => $product->getDescription(),
-            'weight' => $product->getWeight(),
-            'enabled' => $product->isEnabled(),
-        ];
+        //Use the toArray method to convert the product to an array
+        $data = $product->toArray();
 
         return new JsonResponse(['product' =>  $data], Response::HTTP_OK);
     }
@@ -82,17 +77,11 @@ class ProductsController extends AbstractController
     #[Route('api/products/search/{search}', name: 'products_search', methods: ['GET', 'HEAD'])]
     public function search(string $search): JsonResponse
     {
-        $queryBuilder = $this->entityManager->createQueryBuilder();
 
-        $queryBuilder->select('products')
-            ->from(Product::class, 'products')
-            ->where('products.name LIKE :search')
-            ->orWhere('products.description LIKE :search')
-            ->orWhere('products.id LIKE :search')
-            ->setParameter('search', '%' . $search . '%');
+        //Use the search method from the ProductRepository to search for products that contains the search string in their name, description or id
+        $products = $this->productRepository->search($search);
 
-        $products = $queryBuilder->getQuery()->getResult();
-
+        //If no product matches the search, return a 404 error
         if (!$products) {
             return new JsonResponse(['status' => 'No product matches the search'], Response::HTTP_NOT_FOUND);
         }
@@ -106,6 +95,7 @@ class ProductsController extends AbstractController
                 'description' => $product->getDescription(),
                 'weight' => $product->getWeight(),
                 'enabled' => $product->isEnabled(),
+                'image_url' => $product->getImgUrl(),
             ];
         }
 
@@ -116,17 +106,15 @@ class ProductsController extends AbstractController
     #[Route('api/products/create', name: 'products_add', methods: ['POST'])]
     public function add(Request $request): JsonResponse
     {
-        // return $this->json(['status' => 'Product created'], Response::HTTP_CREATED);
-        $entityManager = $this->entityManager;
 
-        $product = new Product();
-        $product->setName($request->request->get('name'));
-        $product->setDescription($request->request->get('description'));
-        $product->setWheight($request->request->get('weight'));
-        $product->setEnabled($request->request->get('enabled'));
+        //Check if all mandatory parameters are present
+        if(!$request->request->get('name') || !$request->request->get('description') || !$request->request->get('weight') || !$request->request->get('enabled')) {
+            return new JsonResponse(['status' => 'Missing mandatory parameters'], Response::HTTP_BAD_REQUEST);
+        }
 
-        $entityManager->persist($product);
-        $entityManager->flush();
+        //Use the save method from the ProductRepository
+        $this->productRepository->save($request->request->get('name'), $request->request->get('description'),
+                                        $request->request->get('weight'), $request->request->get('enabled'), $request->request->get('image_url'));
 
         return new JsonResponse(['status' => 'Product created'], Response::HTTP_CREATED);
     }
@@ -135,36 +123,50 @@ class ProductsController extends AbstractController
     #[Route('api/products/update/{id}', name: 'products_update', methods: ['PUT'])]
     public function updateProduct(Request $request, $id): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
 
-        $product = $this->entityManager->getRepository(Product::class)->find($id);
+        $product = $this->productRepository->find($id);
 
+        //If there is no product with the given id, return a 404 error
         if (!$product) {
             return new JsonResponse(['status' => 'Product not found'], Response::HTTP_NOT_FOUND);
         }
 
-        $product->setName($data['name']);
-        $product->setPrice($data['price']);
-        $product->setDescription($data['description']);
+        //Update only the fields that are present in the request
+        if ($request->request->get('name')) {
+            $product->setName($request->request->get('name'));
+        }
+        if ($request->request->get('description')) {
+            $product->setDescription($request->request->get('description'));
+        }
+        if ($request->request->get('weight')) {
+            $product->setWeight($request->request->get('weight'));
+        }
+        if ($request->request->get('enabled')) {
+            $product->setEnabled($request->request->get('enabled'));
+        }
+        if ($request->request->get('image_url')) {
+            $product->setImgUrl($request->request->get('image_url'));
+        }
+        //Use the update method from the ProductRepository
+        $product = $this->productRepository->update($product);
 
-        $this->entityManager->persist($product);
-        $this->entityManager->flush();
 
-        return new Response(sprintf('Product %s updated', $product->getId()));
+        return new JsonResponse(['status' => 'Product updated', 'product' => $product->toArray()], Response::HTTP_OK);
     }
 
     //Delete a product from the database
     #[Route('api/products/delete/{id}', name: 'products_delete', methods: ['DELETE'])]
     public function deleteProduct($id): JsonResponse
     {
-        $product = $this->getDoctrine()->getRepository(Product::class)->find($id);
+        $product = $this->productRepository->find($id);
 
+        //If there is no product with the given id, return a 404 error
         if (!$product) {
             return new JsonResponse(['status' => 'Product not found'], Response::HTTP_NOT_FOUND);
         }
 
-        $this->entityManager->remove($product);
-        $this->entityManager->flush();
+        //Use the remove method from the ProductRepository
+        $this->productRepository->remove($product);
 
         return new JsonResponse(['status' => 'Product deleted'], Response::HTTP_OK);
     }

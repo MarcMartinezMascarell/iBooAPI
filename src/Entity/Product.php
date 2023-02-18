@@ -63,7 +63,7 @@ class Product
         return $this->weight;
     }
 
-    public function setWheight(?float $weight): self
+    public function setWeight(?float $weight): self
     {
         $this->weight = $weight;
 
@@ -92,5 +92,17 @@ class Product
         $this->img_url = $img_url;
 
         return $this;
+    }
+
+    public function toArray()
+    {
+        return [
+            'id' => $this->getId(),
+            'name' => $this->getName(),
+            'description' => $this->getDescription(),
+            'weight' => $this->getWeight(),
+            'enabled' => $this->isEnabled(),
+            'img_url' => $this->getImgUrl(),
+        ];
     }
 }

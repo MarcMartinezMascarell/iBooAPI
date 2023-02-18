@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Product;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @extends ServiceEntityRepository<Product>
@@ -16,43 +17,59 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ProductRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+
+    private EntityManagerInterface $entityManager;
+
+    public function __construct(ManagerRegistry $registry, EntityManagerInterface $entityManager)
     {
         parent::__construct($registry, Product::class);
+        $this->entityManager = $entityManager;
     }
 
-    public function save(Product $entity, bool $flush = false): void
+    public function save($name, $description, $weight, $enabled, $image_url): void
     {
-        $this->getEntityManager()->persist($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
+        $product = new Product();
+        $product->setName($name);
+        $product->setDescription($description);
+        $product->setWeight($weight);
+        $product->setEnabled($enabled);
+        if($image_url) {
+            $product->setImgUrl($image_url);
         }
+
+        $this->entityManager->persist($product);
+        $this->entityManager->flush();
     }
 
-    public function remove(Product $entity, bool $flush = false): void
+    public function update(Product $product): Product
     {
-        $this->getEntityManager()->remove($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
+        $this->entityManager->persist($product);
+        $this->entityManager->flush();
+        return $product;
     }
 
-//    /**
-//     * @return Product[] Returns an array of Product objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('p.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function remove(Product $product): void
+    {
+        $this->entityManager->remove($product);
+        $this->entityManager->flush();
+    }
+
+   /**
+    * @return Product[] Returns an array of Product objects
+    */
+   public function search($search): array
+   {
+
+        //Search for products with a name, description or id that contains the search string
+        return $this->createQueryBuilder('products')
+            ->where('products.name LIKE :search')
+            ->orWhere('products.description LIKE :search')
+            ->orWhere('products.id LIKE :search')
+            ->setParameter('search', '%' . $search . '%')
+            ->getQuery()
+            ->getResult();
+
+   }
 
 //    public function findOneBySomeField($value): ?Product
 //    {
