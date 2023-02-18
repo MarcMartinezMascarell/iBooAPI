@@ -39,6 +39,11 @@ class ProductsController extends AbstractController
     {
         $products = $this->productRepository->findAll();
 
+        //If there are no products in the database, return a 404 error
+        if (!$products) {
+            return new JsonResponse(['status' => 'No products found'], Response::HTTP_NOT_FOUND);
+        }
+
         $data = [];
 
         foreach ($products as $product) {
@@ -48,7 +53,7 @@ class ProductsController extends AbstractController
                 'description' => $product->getDescription(),
                 'weight' => $product->getWeight(),
                 'enabled' => $product->isEnabled(),
-                'image_url' => $product->getImgUrl(),
+                'image_url' => $product->getImg(),
             ];
         }
 
@@ -95,7 +100,7 @@ class ProductsController extends AbstractController
                 'description' => $product->getDescription(),
                 'weight' => $product->getWeight(),
                 'enabled' => $product->isEnabled(),
-                'image_url' => $product->getImgUrl(),
+                'image_url' => $product->getImg(),
             ];
         }
 
@@ -142,12 +147,12 @@ class ProductsController extends AbstractController
             $product->setWeight($request->request->get('weight'));
         }
         if ($request->request->get('enabled')) {
-            $product->setEnabled($request->request->get('enabled'));
+            $product->setEnabled(true);
         } else if($request->request->get('enabled') == '0') {
             $product->setEnabled(false);
         }
-        if ($request->request->get('image_url')) {
-            $product->setImgUrl($request->request->get('image_url'));
+        if ($request->request->get('img')) {
+            $product->setImg($request->request->get('img'));
         }
         //Use the update method from the ProductRepository
         $product = $this->productRepository->update($product);

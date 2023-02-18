@@ -26,15 +26,15 @@ class ProductRepository extends ServiceEntityRepository
         $this->entityManager = $entityManager;
     }
 
-    public function save($name, $description, $weight, $enabled, $image_url): void
+    public function save($name, $description, $weight, $enabled, $img): void
     {
         $product = new Product();
         $product->setName($name);
         $product->setDescription($description);
         $product->setWeight($weight);
         $product->setEnabled($enabled);
-        if($image_url) {
-            $product->setImgUrl($image_url);
+        if($img) {
+            $product->setImg($img);
         }
 
         $this->entityManager->persist($product);

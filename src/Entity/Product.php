@@ -27,7 +27,7 @@ class Product
     private ?bool $enabled = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $img_url = null;
+    private ?string $img = null;
 
     public function getId(): ?int
     {
@@ -82,14 +82,14 @@ class Product
         return $this;
     }
 
-    public function getImgUrl(): ?string
+    public function getImg(): ?string
     {
-        return $this->img_url;
+        return $this->img;
     }
 
-    public function setImgUrl(?string $img_url): self
+    public function setImg(?string $img): self
     {
-        $this->img_url = $img_url;
+        $this->img = $img;
 
         return $this;
     }
@@ -102,7 +102,7 @@ class Product
             'description' => $this->getDescription(),
             'weight' => $this->getWeight(),
             'enabled' => $this->isEnabled(),
-            'img_url' => $this->getImgUrl(),
+            'img' => $this->getImg(),
         ];
     }
 }

@@ -11,15 +11,27 @@
         <ul class="products_list">
             {% for product in products %}
                 <li class="product_item">
-                    <a href="#">
-                        {{ product.name }}
-                    </a>
-                    
-                    <a href="#">edit</a>
+                    <div class="product_img">
+                        {% if product.img %}
+                            <img class="img" src="{{ product.img }}" alt="{{ product.name }}">
+                        {% endif %}
+                    </div>
+                    <div class="img_overlay"></div>  
+                    <div class="product_info">
+                        <h2 class="product_name">{{ product.name }}</h2>
+                        <div class="product_text">
+                            <p class="product_description">{{ product.description }}</p>
+                            <p class="product_price">{{ product.weight }} Kg</p>
+                        </div>
+                    </div>  
                 </li>
             {% endfor %}
         </ul>
-        {% else %}
-            <p>There are no products right now.</p>
+    {% else %}
+        <p>There are no products right now.</p>
     {% endif %}
+    <div class="message">
+        In this challenge, you need to use the API to create, update or delete products. You can use the
+        <a href="https://documenter.getpostman.com/view/12623615/2s93CHuEys" target="_blank">API documentation</a> to help you.
+    </div>
 {% endblock %}

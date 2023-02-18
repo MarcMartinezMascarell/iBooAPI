@@ -20,12 +20,12 @@ final class Version20230218092251 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE product ADD img_url LONGTEXT DEFAULT NULL');
+        $this->addSql('ALTER TABLE product ADD img LONGTEXT DEFAULT NULL');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE product DROP img_url');
+        $this->addSql('ALTER TABLE product DROP img');
     }
 }
