@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+{% block stylesheets %}
+
+    <link rel="stylesheet" href="{{ asset('css/products.css') }}">
+    
+{% endblock %}
+
+{% block body %}
+    {% if products %}
+        <h1>Products list</h1>
+        <ul class="products_list">
+            {% for product in products %}
+                <li class="product_item">
+                    <a href="#">
+                        {{ product.name }}
+                    </a>
+                    
+                    <a href="#">edit</a>
+                </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+            <p>There are no products right now.</p>
+    {% endif %}
+{% endblock %}

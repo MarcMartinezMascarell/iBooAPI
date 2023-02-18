@@ -1,0 +1,18 @@
+body {
+    background-color: #303030;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #fff;
+    background-image: url(../images/bg.png);
+    background-repeat: repeat;
+    background-attachment: fixed;
+    background-position: center top;
+    background-size: cover;
+}
+
+.products_list {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
