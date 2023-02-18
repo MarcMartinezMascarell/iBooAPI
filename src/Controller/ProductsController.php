@@ -108,7 +108,7 @@ class ProductsController extends AbstractController
     {
 
         //Check if all mandatory parameters are present
-        if(!$request->request->get('name') || !$request->request->get('description') || !$request->request->get('weight') || !$request->request->get('enabled')) {
+        if(!$request->request->get('name') || !$request->request->get('description') || !$request->request->get('weight')) {
             return new JsonResponse(['status' => 'Missing mandatory parameters'], Response::HTTP_BAD_REQUEST);
         }
 
@@ -120,7 +120,7 @@ class ProductsController extends AbstractController
     }
 
     //Update a product in the database from an HTTP PUT request
-    #[Route('api/products/update/{id}', name: 'products_update', methods: ['PUT'])]
+    #[Route('api/products/update/{id}', name: 'products_update', methods: ['PATCH'])]
     public function updateProduct(Request $request, $id): JsonResponse
     {
 
@@ -143,6 +143,8 @@ class ProductsController extends AbstractController
         }
         if ($request->request->get('enabled')) {
             $product->setEnabled($request->request->get('enabled'));
+        } else if($request->request->get('enabled') == '0') {
+            $product->setEnabled(false);
         }
         if ($request->request->get('image_url')) {
             $product->setImgUrl($request->request->get('image_url'));
