@@ -54,7 +54,7 @@ class ProductsController extends AbstractController
                 'description' => $product->getDescription(),
                 'weight' => $product->getWeight(),
                 'enabled' => $product->isEnabled(),
-                'image_url' => $product->getImg(),
+                'img' => $product->getImg(),
                 'category' => $product->getCategory()->getName(),
             ];
         }
@@ -126,7 +126,7 @@ class ProductsController extends AbstractController
                                         $request->request->get('weight'), $request->request->get('enabled'), $request->request->get('image_url'),
                                         (int)$request->request->get('category'));
 
-        return new JsonResponse(['status' => 'Product created', 'product' => $product], Response::HTTP_CREATED);
+        return new JsonResponse(['status' => 'Product created', 'product' => $product->toArray()], Response::HTTP_CREATED);
     }
 
     //Update a product in the database from an HTTP PUT request
