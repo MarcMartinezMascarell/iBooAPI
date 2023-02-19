@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Repository\ProductRepository;
 use App\Entity\Product;
+use App\Entity\Category;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -54,6 +55,7 @@ class ProductsController extends AbstractController
                 'weight' => $product->getWeight(),
                 'enabled' => $product->isEnabled(),
                 'image_url' => $product->getImg(),
+                'category' => $product->getCategory()->getName(),
             ];
         }
 
@@ -100,7 +102,8 @@ class ProductsController extends AbstractController
                 'description' => $product->getDescription(),
                 'weight' => $product->getWeight(),
                 'enabled' => $product->isEnabled(),
-                'image_url' => $product->getImg(),
+                'img' => $product->getImg(),
+                'category' => $product->getCategory()->getName(),
             ];
         }
 
@@ -113,15 +116,17 @@ class ProductsController extends AbstractController
     {
 
         //Check if all mandatory parameters are present
-        if(!$request->request->get('name') || !$request->request->get('description') || !$request->request->get('weight')) {
+        if(!$request->request->get('name') || !$request->request->get('description') || !$request->request->get('weight') ||
+            !$request->request->get('category')) {
             return new JsonResponse(['status' => 'Missing mandatory parameters'], Response::HTTP_BAD_REQUEST);
         }
 
         //Use the save method from the ProductRepository
-        $this->productRepository->save($request->request->get('name'), $request->request->get('description'),
-                                        $request->request->get('weight'), $request->request->get('enabled'), $request->request->get('image_url'));
+        $product = $this->productRepository->save($request->request->get('name'), $request->request->get('description'),
+                                        $request->request->get('weight'), $request->request->get('enabled'), $request->request->get('image_url'),
+                                        (int)$request->request->get('category'));
 
-        return new JsonResponse(['status' => 'Product created'], Response::HTTP_CREATED);
+        return new JsonResponse(['status' => 'Product created', 'product' => $product], Response::HTTP_CREATED);
     }
 
     //Update a product in the database from an HTTP PUT request
@@ -154,6 +159,10 @@ class ProductsController extends AbstractController
         if ($request->request->get('img')) {
             $product->setImg($request->request->get('img'));
         }
+        if ($request->request->get('category')) {
+            $product->setCategory($request->request->get('category'));
+        }
+
         //Use the update method from the ProductRepository
         $product = $this->productRepository->update($product);
 

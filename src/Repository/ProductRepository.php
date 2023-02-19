@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Category;
 use App\Entity\Product;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -26,7 +27,7 @@ class ProductRepository extends ServiceEntityRepository
         $this->entityManager = $entityManager;
     }
 
-    public function save($name, $description, $weight, $enabled, $img): void
+    public function save($name, $description, $weight, $enabled, $img, $categoryId): void
     {
         $product = new Product();
         $product->setName($name);
@@ -36,6 +37,8 @@ class ProductRepository extends ServiceEntityRepository
         if($img) {
             $product->setImg($img);
         }
+        $category = $this->entityManager->getRepository(Category::class)->find($categoryId);
+        $product->setCategory($category);
 
         $this->entityManager->persist($product);
         $this->entityManager->flush();
