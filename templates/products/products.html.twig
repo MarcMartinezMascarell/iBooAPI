@@ -6,8 +6,8 @@
 {% endblock %}
 
 {% block body %}
-    {% if products %}
         <h1>Products list</h1>
+        <input type="text" id="search" placeholder="Search for products...">
         <ul id="products_list" class="products_list">
             {# {% for product in products %}
                 <li class="product_item">
@@ -27,9 +27,7 @@
                 </li>
             {% endfor %} #}
         </ul>
-    {% else %}
-        <p id="error">There are no products right now.</p>
-    {% endif %}
+        <p id="error"></p>
     <div class="message">
         In this challenge, you need to use the API to create, update or delete products. You can use the
         <a href="https://documenter.getpostman.com/view/12623615/2s93CHuEys" target="_blank">API documentation</a> to help you.

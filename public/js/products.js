@@ -1,25 +1,37 @@
 
 document.addEventListener('DOMContentLoaded', function() {
-    getProducts();
+    getProducts("http://localhost:8000/api/products");
+    document.getElementById('search').addEventListener('keyup', function() {
+        if(this.value == '')
+            getProducts("http://localhost:8000/api/products");
+        else 
+            getProducts("http://localhost:8000/api/products/search/" + this.value);
+    });
 });
-function getProducts() {
+
+
+
+
+function getProducts(url) {
     let http = new XMLHttpRequest();
     let list = document.getElementById('products_list');
     list.innerHTML = '<p>Loading...</p>';
 
-    let url = 'http://localhost:8000/api/products';
     http.open('GET', url, true);
     http.onreadystatechange = function() {
         if (http.readyState == 4 && http.status == 200) {
             let products = JSON.parse(http.responseText);
             if(products) {
+                document.getElementById('error').innerHTML = '';
                 list.innerHTML = '';
                 products.products.forEach(product => {
                     list.appendChild(createProduct(product));
                 });
             } else {
-                document.getElementById('error').innerHTML = 'No products found';
+                list.innerHTML = '<p>No products found</p>';
             }
+        } else {
+            list.innerHTML = '<p>No products found</p>';
         }
     }
     http.send();
