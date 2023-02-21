@@ -27,18 +27,16 @@ class ProductsController extends AbstractController
     #[Route('/', name: 'products_list', methods: ['GET', 'HEAD'])]
     public function list(): Response
     {
-        $products = $this->productRepository->findAll();
+        // $products = $this->productRepository->findAll();
 
-        return $this->render('products/products.html.twig', [
-            'products' => $products,
-        ]);
+        return $this->render('products/products.html.twig');
     }
 
     //Retrieve all products from the database
     #[Route('api/products', name: 'products', methods: ['GET', 'HEAD'])]
     public function index(): JsonResponse
     {
-        $products = $this->productRepository->findAll();
+        $products = $this->productRepository->findAllEnabled();
 
         //If there are no products in the database, return a 404 error
         if (!$products) {
@@ -123,7 +121,7 @@ class ProductsController extends AbstractController
 
         //Use the save method from the ProductRepository
         $product = $this->productRepository->save($request->request->get('name'), $request->request->get('description'),
-                                        $request->request->get('weight'), $request->request->get('enabled'), $request->request->get('image_url'),
+                                        $request->request->get('weight'), $request->request->get('enabled'), $request->request->get('img'),
                                         (int)$request->request->get('category'));
 
         return new JsonResponse(['status' => 'Product created', 'product' => $product->toArray()], Response::HTTP_CREATED);

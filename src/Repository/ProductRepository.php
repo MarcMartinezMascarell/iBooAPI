@@ -74,6 +74,17 @@ class ProductRepository extends ServiceEntityRepository
 
    }
 
+   /**
+    * @return Product[] Returns an array of Product objects
+    */
+    public function findAllEnabled(): array {
+        return $this->createQueryBuilder('p')
+        ->where('p.enabled = :enabled')
+        ->setParameter('enabled', true)
+        ->getQuery()
+        ->getResult();
+    }
+
 //    public function findOneBySomeField($value): ?Product
 //    {
 //        return $this->createQueryBuilder('p')

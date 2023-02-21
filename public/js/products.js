@@ -50,6 +50,7 @@ function createProduct(product) {
             <div class="product_text">
                 <p class="product_description">${product.description}</p>
                 <p class="product_price">${product.weight} Kg</p>
+                <p class="product_category">${product.category}</p>
             </div>
         </div>`;
     return li;
