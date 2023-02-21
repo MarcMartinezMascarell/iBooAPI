@@ -120,11 +120,11 @@ class ProductsController extends AbstractController
         }
 
         //Use the save method from the ProductRepository
-        $product = $this->productRepository->save($request->request->get('name'), $request->request->get('description'),
+        $this->productRepository->save($request->request->get('name'), $request->request->get('description'),
                                         $request->request->get('weight'), $request->request->get('enabled'), $request->request->get('img'),
                                         (int)$request->request->get('category'));
 
-        return new JsonResponse(['status' => 'Product created', 'product' => $product->toArray()], Response::HTTP_CREATED);
+        return new JsonResponse(['status' => 'Product created'], Response::HTTP_CREATED);
     }
 
     //Update a product in the database from an HTTP PUT request
